@@ -1,11 +1,12 @@
 import logging
 import asyncio
+import json
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import LabeledPrice, PreCheckoutQuery, InlineKeyboardMarkup, InlineKeyboardButton, Message
 
 API_TOKEN = '7034849085:AAEktvROGNHpbKQV6BNfPZZPXuQbmhOxFD0'
-PROVIDER_TOKEN = 'YOUR_PROVIDER_TOKEN'  # Полученный от вашего платежного провайдера
+PROVIDER_TOKEN = 'YOUR_PROVIDER_TOKEN'  # Замените на ваш реальный provider token
 
 logging.basicConfig(level=logging.INFO)
 
@@ -61,7 +62,9 @@ async def process_successful_payment(message: Message):
 @dp.message(lambda message: message.web_app_data is not None)
 async def handle_web_app_data(message: Message):
     web_app_data = message.web_app_data.data
-    await message.answer(f"Получены данные из веб-приложения: {web_app_data}")
+    data = json.loads(web_app_data)
+    if data.get('action') == 'pay':
+        await process_pay_command(message)
 
 # Основная функция для запуска бота
 async def main():
